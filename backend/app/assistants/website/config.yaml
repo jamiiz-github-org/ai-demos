@@ -1,0 +1,5 @@
+assistant_type: website
+display_name: "Jamiiz AI Assistant"
+namespace: jamiiz-website
+retrieval_k: 4
+use_langgraph: false
