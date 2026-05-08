@@ -1,0 +1,5 @@
+assistant_type: property
+display_name: "Guest AI Assistant"
+namespace: property-demo
+retrieval_k: 4
+use_langgraph: false
