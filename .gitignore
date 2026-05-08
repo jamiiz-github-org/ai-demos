@@ -217,3 +217,4 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 knowledge/jamiiz/ai-automation-sprint.md
+.DS_Store
