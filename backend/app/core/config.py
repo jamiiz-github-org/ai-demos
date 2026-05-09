@@ -42,7 +42,7 @@ class Settings(BaseSettings):
     # ── App ───────────────────────────────────────────────────────────
     app_env: str = "development"
     log_level: str = "INFO"
-    allowed_origins: str = "http://localhost:3000,http://localhost:5173"
+    allowed_origins: str = "*"
 
     # ── LangSmith ─────────────────────────────────────────────────────
     # Accept both LANGSMITH_API_KEY and LANGCHAIN_API_KEY (env uses LANGSMITH_API_KEY)

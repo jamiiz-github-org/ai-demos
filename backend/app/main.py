@@ -50,10 +50,11 @@ def create_app() -> FastAPI:
     )
 
     # CORS — allow the frontend dev server and production domain
+    origins = settings.origins_list
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.origins_list,
-        allow_credentials=True,
+        allow_origins=origins,
+        allow_credentials="*" not in origins,
         allow_methods=["*"],
         allow_headers=["*"],
     )
