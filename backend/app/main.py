@@ -10,6 +10,7 @@ Three assistants, one backend:
   GET  /health            — service health check
 """
 import logging
+import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -29,6 +30,13 @@ logger = logging.getLogger("jamiiz")
 # ── App factory ───────────────────────────────────────────────────────
 def create_app() -> FastAPI:
     settings = get_settings()
+
+    # ── LangSmith tracing ─────────────────────────────────────────────
+    if settings.langsmith_api_key:
+        os.environ["LANGCHAIN_TRACING_V2"] = "true"
+        os.environ["LANGCHAIN_API_KEY"] = settings.langsmith_api_key
+        os.environ["LANGCHAIN_PROJECT"] = settings.langchain_project
+        logging.getLogger("jamiiz").info("LangSmith tracing enabled → project: %s", settings.langchain_project)
 
     app = FastAPI(
         title="Jamiiz AI Demo Lab",
