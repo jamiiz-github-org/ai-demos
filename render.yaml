@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: jamiiz-ai-demos
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install uv && uv sync
+    startCommand: uv run uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
+      - key: PINECONE_INDEX_NAME
+        value: jamiiz-ai-demo
+      - key: PINECONE_NS_WEBSITE
+        value: jamiiz-website
+      - key: PINECONE_NS_PROPERTY
+        value: property-demo
+      - key: PINECONE_NS_DOCUMENT
+        value: document-demo
+      - key: PINECONE_NS_NONPROFIT
+        value: nonprofit-demo
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: PINECONE_API_KEY
+        sync: false
+      - key: LANGSMITH_API_KEY
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false

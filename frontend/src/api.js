@@ -2,7 +2,8 @@ import axios from 'axios'
 
 // In dev, Vite proxy handles requests (baseURL = '').
 // In production, VITE_API_URL points to the deployed backend e.g. https://jamiiz-ai-demos.onrender.com
-const api = axios.create({ baseURL: import.meta.env.VITE_API_URL || '' })
+const API_URL = import.meta.env.VITE_API_URL || 'https://jamiiz-ai-demos.onrender.com'
+const api = axios.create({ baseURL: API_URL })
 
 export async function sendMessage({ message, assistantType, sessionId, history = [] }) {
   const { data } = await api.post('/chat', {
