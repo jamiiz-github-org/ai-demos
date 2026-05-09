@@ -37,6 +37,7 @@ class Settings(BaseSettings):
     pinecone_ns_website: str = "jamiiz-website"
     pinecone_ns_property: str = "property-demo"
     pinecone_ns_document: str = "document-demo"
+    pinecone_ns_nonprofit: str = "nonprofit-demo"
 
     # ── App ───────────────────────────────────────────────────────────
     app_env: str = "development"
@@ -60,9 +61,10 @@ class Settings(BaseSettings):
 
     def namespace_for(self, assistant_type: str) -> str:
         mapping = {
-            "website": self.pinecone_ns_website,
-            "property": self.pinecone_ns_property,
-            "document": self.pinecone_ns_document,
+            "website":   self.pinecone_ns_website,
+            "property":  self.pinecone_ns_property,
+            "document":  self.pinecone_ns_document,
+            "nonprofit": self.pinecone_ns_nonprofit,
         }
         ns = mapping.get(assistant_type)
         if not ns:
