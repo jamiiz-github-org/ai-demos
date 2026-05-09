@@ -10,23 +10,23 @@ const DEMOS = [
   {
     id: 'website',
     assistantType: 'website',
-    label: 'Website Assistant',
+    label: 'Jamiiz Assistant',
     tag: 'Lead Generation',
     tagColor: 'orange',
     headline: 'An AI that works your website 24/7',
     description:
-      'Answers questions about your business, services, and pricing — and turns visitors into leads without you lifting a finger.',
+      'Answers questions about your business, services, and pricing and turns visitors into leads without you lifting a finger.',
     pitch: 'Imagine this on your website capturing leads and answering customer questions around the clock.',
   },
   {
     id: 'property',
     assistantType: 'property',
-    label: 'Guest Assistant',
+    label: 'Asante Guest Assistant',
     tag: 'Property & Hospitality',
     tagColor: 'green',
     headline: 'Stop answering the same guest questions',
     description:
-      'Check-in times, house rules, local recommendations — your guests get instant answers, you get your time back.',
+      'Check-in times, house rules, local recommendations, your guests get instant answers, you get your time back.',
     pitch: 'Imagine your guests getting instant answers without you replying to the same messages every day.',
   },
   {
@@ -37,15 +37,25 @@ const DEMOS = [
     tagColor: 'blue',
     headline: 'Ask questions across any document',
     description:
-      'Upload a grant, contract, policy, or SOP — then ask anything. Summarise, extract key info, or draft a response.',
+      'Upload a grant, contract, policy, or SOP then ask anything. Summarise, extract key info, or draft a response.',
     pitch: 'Imagine your team asking questions across grants, policies, and SOPs instead of searching manually.',
+  },
+  {
+    id: 'nonprofit',
+    assistantType: 'nonprofit',
+    label: 'Smile Again Assistant',
+    tag: 'Nonprofit & NGO',
+    tagColor: 'purple',
+    headline: 'An AI built for Smile Again Families',
+    description:
+      'Answers questions about programs, impact, sponsorship, volunteering, and grant opportunities trained on the real website content.',
+    pitch: 'Imagine every donor, volunteer, and grant writer getting instant answers about your mission and how to help.',
   },
 ]
 
 export default function App() {
   const [activeDemo, setActiveDemo] = useState('website')
   const [showLead, setShowLead] = useState(false)
-
   const current = DEMOS.find((d) => d.id === activeDemo)
 
   return (
@@ -61,6 +71,7 @@ export default function App() {
           <nav className="nav-links">
             <a href="https://ai.jamiiz.io" target="_blank" rel="noopener">Website</a>
             <a href="#demos">Demos</a>
+            <a href="#how-it-works">How It Works</a>
             <button className="btn-nav-cta" onClick={() => setShowLead(true)}>
               Free AI Review
             </button>
@@ -74,7 +85,7 @@ export default function App() {
           <div className="hero-badge">Live Demo Lab</div>
           <h1>AI that works while<br /><span>you sleep</span></h1>
           <p className="hero-sub">
-            Three real AI assistants — trained on real business content. Pick one and start chatting.
+            Four real AI assistants trained on real business content. Pick one and start chatting.
           </p>
           <div className="hero-cta-row">
             <button className="btn-primary" onClick={() => document.getElementById('demos').scrollIntoView({ behavior: 'smooth' })}>
@@ -92,8 +103,8 @@ export default function App() {
       <section className="demos-section" id="demos">
         <div className="demos-inner">
           <div className="demos-header">
-            <h2>Three demos. One backend.</h2>
-            <p>Each assistant is trained on real content. Adding a new one takes hours, not months.</p>
+            <h2>Jamiiz AI Demos.</h2>
+            <p>Each assistant is trained on real content. Adding a new one takes weeks, not months.</p>
           </div>
 
           {/* Tab switcher */}
@@ -102,7 +113,13 @@ export default function App() {
               <button
                 key={d.id}
                 className={`demo-tab ${activeDemo === d.id ? 'active' : ''}`}
-                onClick={() => setActiveDemo(d.id)}
+                onClick={(e) => {
+                  e.preventDefault()
+                  setActiveDemo(d.id)
+                  requestAnimationFrame(() => {
+                    document.getElementById('demos')?.scrollIntoView({ behavior: 'instant', block: 'start' })
+                  })
+                }}
               >
                 <span className={`demo-tab-dot ${d.tagColor}`} />
                 {d.label}
@@ -143,14 +160,14 @@ export default function App() {
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section className="how-section">
+      <section className="how-section" id="how-it-works">
         <div className="how-inner">
           <h2>How it works</h2>
           <div className="how-steps">
             {[
-              { n: '01', title: 'We learn your business', body: 'We ingest your documents, website, workflows — whatever content drives your team.' },
+              { n: '01', title: 'We learn your business', body: 'We ingest your documents, website, workflows, and whatever content drives your team.' },
               { n: '02', title: 'We build your assistant', body: 'A custom AI trained on your content, with your voice, your rules, your escalation triggers.' },
-              { n: '03', title: 'It goes live in days', body: 'Embedded on your site, your Slack, your inbox — wherever the work actually happens.' },
+              { n: '03', title: 'It goes live in days', body: 'Embedded on your site, your Slack, your inbox, or wherever the work actually happens.' },
             ].map((s) => (
               <div key={s.n} className="how-step">
                 <div className="step-number">{s.n}</div>
@@ -166,7 +183,7 @@ export default function App() {
       <section className="cta-strip">
         <div className="cta-strip-inner">
           <h2>Ready to see what AI can do for your business?</h2>
-          <p>Free 60-minute AI Workflow Review. No commitment. No sales pitch.</p>
+          <p>Free 30-minute AI Workflow Review. No commitment. No sales pitch.</p>
           <button className="btn-primary large" onClick={() => setShowLead(true)}>
             Book My Free Review →
           </button>
