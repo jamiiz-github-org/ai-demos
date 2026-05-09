@@ -9,7 +9,7 @@ class ChatMessage(BaseModel):
 
 class ChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=2000)
-    assistant_type: Literal["website", "property", "document"] = "document"
+    assistant_type: Literal["website", "property", "document", "nonprofit"] = "document"
     session_id: str | None = None
     history: list[ChatMessage] = Field(default_factory=list)
     # For document assistant — which uploaded namespace to query
