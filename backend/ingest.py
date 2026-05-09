@@ -2,15 +2,15 @@
 Knowledge base ingestion script.
 
 Usage:
-    uv run python3 ingest.py              # ingest all three namespaces
+    uv run python3 ingest.py              # ingest all namespaces
     uv run python3 ingest.py --jamiiz     # ingest Jamiiz website only
-    uv run python3 ingest.py --property   # ingest property only
-    uv run python3 ingest.py --nonprofit  # ingest nonprofit only
+    uv run python3 ingest.py --property   # ingest Asante Stays only
+    uv run python3 ingest.py --smile      # ingest Smile Again only
     uv run python3 ingest.py --clear      # wipe all namespaces before ingesting
+    uv run python3 ingest.py --clear-document  # wipe document-demo (user uploads)
 """
 import argparse
 import logging
-import sys
 from pathlib import Path
 
 # ── Logging ──────────────────────────────────────────────────────────────────
@@ -25,9 +25,9 @@ logger = logging.getLogger("ingest")
 BASE = Path(__file__).parent.parent / "knowledge"
 
 SOURCES = {
-    "jamiiz":    BASE / "jamiiz",
-    "property":  BASE / "property",
-    "nonprofit": BASE / "nonprofit",
+    "jamiiz":   BASE / "jamiiz",
+    "property": BASE / "property",
+    "smile":    BASE / "nonprofit",
 }
 
 
@@ -41,9 +41,9 @@ def ingest(namespaces: list[str], clear: bool = False) -> None:
     pinecone  = get_pinecone_service()
 
     ns_map = {
-        "jamiiz":    settings.pinecone_ns_website,
-        "property":  settings.pinecone_ns_property,
-        "nonprofit": settings.pinecone_ns_document,
+        "jamiiz":   settings.pinecone_ns_website,
+        "property": settings.pinecone_ns_property,
+        "smile":    settings.pinecone_ns_nonprofit,
     }
 
     for key in namespaces:
@@ -81,14 +81,25 @@ def ingest(namespaces: list[str], clear: bool = False) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Ingest knowledge bases into Pinecone")
-    parser.add_argument("--jamiiz",    action="store_true", help="Ingest Jamiiz website knowledge base")
-    parser.add_argument("--property",  action="store_true", help="Ingest Asante Stays property knowledge base")
-    parser.add_argument("--nonprofit", action="store_true", help="Ingest Smile Again nonprofit knowledge base")
-    parser.add_argument("--clear",     action="store_true", help="Clear existing vectors before ingesting")
+    parser.add_argument("--jamiiz",         action="store_true", help="Ingest Jamiiz website knowledge base")
+    parser.add_argument("--property",       action="store_true", help="Ingest Asante Stays property knowledge base")
+    parser.add_argument("--smile",          action="store_true", help="Ingest Smile Again Families knowledge base")
+    parser.add_argument("--clear",          action="store_true", help="Clear existing vectors before ingesting")
+    parser.add_argument("--clear-document", action="store_true", help="Wipe the document-demo namespace (user uploads) without re-ingesting")
     args = parser.parse_args()
 
+    # Wipe document-demo only, no ingestion
+    if args.clear_document:
+        from app.core.config import get_settings
+        from app.services.pinecone_service import get_pinecone_service
+        ns = get_settings().pinecone_ns_document
+        logger.info("Clearing document namespace: %s", ns)
+        get_pinecone_service().delete_namespace(ns)
+        logger.info("✓ document-demo cleared.")
+        return
+
     # If no specific flag, ingest all
-    selected = [k for k in ("jamiiz", "property", "nonprofit") if getattr(args, k)]
+    selected = [k for k in ("jamiiz", "property", "smile") if getattr(args, k)]
     if not selected:
         selected = list(SOURCES.keys())
 
