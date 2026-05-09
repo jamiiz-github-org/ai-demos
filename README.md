@@ -1,20 +1,21 @@
 # Jamiiz AI Demo Lab
 
-Custom AI assistants trained on your business content — three demos, one backend.
+Custom AI assistants trained on real business content — four demos, one backend, one frontend.
 
-**Built with:** FastAPI · LangChain · LangGraph · Pinecone · OpenAI
+**Built with:** FastAPI · LangChain · LangGraph · Pinecone · OpenAI · React (Vite)
 
 ---
 
-## The Three Demos
+## The Four Demos
 
-| Demo | What it does | Sales message |
-|------|-------------|---------------|
-| **Document Assistant** | Upload any document (PDF, DOCX, TXT) and ask questions about it | "Imagine your team asking questions across grants, policies, and SOPs instead of searching manually" |
-| **Website Assistant** | Answers questions about Jamiiz AI using the knowledge base | "Imagine this on your website capturing leads and answering customer questions 24/7" |
-| **Guest Assistant** | Handles property/Airbnb guest questions automatically | "Imagine your guests getting instant answers without you replying to the same messages every day" |
+| Demo | Assistant Name | What it does |
+|------|---------------|--------------|
+| **Jamiiz Assistant** | `website` | Answers questions about Jamiiz AI services, pricing, and use cases — and captures leads |
+| **Asante Guest Assistant** | `property` | Handles Asante Stays guest questions: check-in, house rules, amenities, pricing |
+| **Document Assistant** | `document` | Upload any document (PDF, DOCX, TXT, MD) and ask questions about it |
+| **Smile Again Assistant** | `nonprofit` | Answers questions about Smile Again Families programs, sponsorships, impact, and grants |
 
-All three share one backend. Adding a new assistant is as simple as adding a prompt and a knowledge base.
+All four share one backend and one Pinecone index. Adding a new assistant takes hours, not months.
 
 ---
 
@@ -24,22 +25,22 @@ All three share one backend. Adding a new assistant is as simple as adding a pro
 ai-demos/
 ├── backend/
 │   ├── app/
-│   │   ├── main.py                        # FastAPI entry point
+│   │   ├── main.py                            # FastAPI entry point + LangSmith tracing
 │   │   ├── core/
-│   │   │   ├── config.py                  # Settings (reads from .env)
+│   │   │   ├── config.py                      # Settings (reads from .env)
 │   │   │   └── logging.py
 │   │   ├── api/
-│   │   │   ├── routes_chat.py             # POST /chat
-│   │   │   ├── routes_documents.py        # POST /documents/upload
-│   │   │   └── routes_leads.py            # POST /leads
+│   │   │   ├── routes_chat.py                 # POST /chat
+│   │   │   ├── routes_documents.py            # POST /documents/upload, /documents/text
+│   │   │   └── routes_leads.py                # POST /leads
 │   │   ├── services/
-│   │   │   ├── pinecone_service.py        # One index, namespace per assistant
-│   │   │   ├── llm_service.py             # OpenAI chat + prompt loader
-│   │   │   ├── rag_service.py             # Retrieve + format context
+│   │   │   ├── pinecone_service.py            # One index, namespace per assistant
+│   │   │   ├── llm_service.py                 # OpenAI chat + prompt loader
+│   │   │   ├── rag_service.py                 # Retrieve + format context
 │   │   │   ├── document_ingestion_service.py  # File → chunks → embeddings → Pinecone
-│   │   │   └── lead_service.py            # SQLite: leads + Q&A log
+│   │   │   └── lead_service.py                # SQLite: leads + Q&A log
 │   │   ├── graphs/
-│   │   │   └── document_graph.py          # LangGraph: classify → retrieve → generate → check
+│   │   │   └── document_graph.py              # LangGraph: classify → retrieve → generate → check
 │   │   ├── schemas/
 │   │   │   ├── chat.py
 │   │   │   ├── documents.py
@@ -47,111 +48,171 @@ ai-demos/
 │   │   └── assistants/
 │   │       ├── document/prompt.md + config.yaml
 │   │       ├── website/prompt.md + config.yaml
-│   │       └── property/prompt.md + config.yaml
+│   │       ├── property/prompt.md + config.yaml
+│   │       └── nonprofit/prompt.md + config.yaml
+│   ├── ingest.py                              # CLI ingestion script (see below)
 │   ├── pyproject.toml
 │   ├── .env.example
 │   └── start.sh
+├── frontend/
+│   ├── public/
+│   │   └── favicon.png                        # Jamiiz J icon
+│   ├── src/
+│   │   ├── App.jsx                            # Main layout, demo tabs, lead modal
+│   │   ├── App.css                            # Jamiiz brand: navy #0e2340, orange #e07b18
+│   │   ├── index.css                          # Inter font, global reset
+│   │   ├── api.js                             # sendMessage, uploadDocument, submitLead
+│   │   └── components/
+│   │       ├── ChatWidget.jsx                 # Chat UI with suggestions + typing indicator
+│   │       ├── FileUpload.jsx                 # Drag & drop file upload for Document tab
+│   │       └── LeadCaptureForm.jsx            # Lead capture modal
+│   ├── index.html
+│   ├── vite.config.js                         # Proxy /chat, /documents, /leads → :8000
+│   └── package.json
 └── knowledge/
-    ├── jamiiz/          # Jamiiz AI company content
-    ├── property/        # Property/guest content
-    └── nonprofit/       # Sample NGO documents
+    ├── jamiiz/          # Jamiiz AI company content, services, FAQs
+    ├── property/        # Asante Stays: amenities, pricing, house rules, local guide
+    └── nonprofit/       # Smile Again Families: programs, impact, donor FAQ, grant profile
 ```
 
 ---
 
 ## Getting Started
 
-### 1. Prerequisites
+### Prerequisites
 
 - Python 3.11+
-- [uv](https://github.com/astral-sh/uv) (recommended) or pip
+- Node.js 20.17+ and npm
+- [uv](https://github.com/astral-sh/uv) (recommended)
 - OpenAI API key
-- Pinecone API key (free tier works for demos)
+- Pinecone API key (free tier works)
 
-### 2. Install dependencies
+---
+
+### Backend
+
+#### 1. Install dependencies
 
 ```bash
 cd backend
-
-# With uv (recommended — same as a-new-uganda repo):
 uv sync
-
-# Or with pip:
-pip install -e ".[dev]"
 ```
 
-### 3. Configure environment
+#### 2. Configure environment
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` and fill in:
+Fill in your keys:
 
 ```env
 OPENAI_API_KEY=sk-...
+OPENAI_MODEL=gpt-4o-mini
+
 PINECONE_API_KEY=pcsk_...
 PINECONE_INDEX_NAME=jamiiz-ai-demo
+
+PINECONE_NS_WEBSITE=jamiiz-website
+PINECONE_NS_PROPERTY=property-demo
+PINECONE_NS_DOCUMENT=document-demo
+PINECONE_NS_NONPROFIT=nonprofit-demo
+
+# Optional but recommended
+LANGSMITH_API_KEY=ls__...
+LANGCHAIN_PROJECT=jamiiz-ai-demos
 ```
 
-Pinecone will auto-create the index on first startup. LangSmith tracing is optional but recommended for debugging.
-
-### 4. Run the server
+#### 3. Ingest knowledge bases
 
 ```bash
-bash start.sh
-# or directly:
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+cd backend
+
+# Ingest all four namespaces
+uv run python3 ingest.py
+
+# Or ingest individually
+uv run python3 ingest.py --jamiiz       # Jamiiz AI website content
+uv run python3 ingest.py --property     # Asante Stays property content
+uv run python3 ingest.py --smile        # Smile Again Families nonprofit content
+
+# Re-ingest cleanly (clears existing vectors first)
+uv run python3 ingest.py --clear
+
+# Clear only the document-demo namespace (user uploads)
+uv run python3 ingest.py --clear-document
 ```
 
-Visit **http://localhost:8000/docs** for the interactive API explorer.
+Chunk IDs are deterministic (MD5 hash of filename + index), so running ingest twice is safe — it overwrites, never duplicates.
+
+#### 4. Start the backend
+
+```bash
+cd backend
+bash start.sh
+# or directly:
+uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+API docs available at **http://localhost:8000/docs**
+
+---
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Opens at **http://localhost:3000** — Vite proxies all `/chat`, `/documents`, `/leads` calls to the backend on port 8000.
 
 ---
 
 ## API Reference
 
-### Chat
-
-```
-POST /chat
-```
+### POST /chat
 
 ```json
 {
-  "message": "What are the eligibility requirements?",
-  "assistant_type": "document",
-  "session_id": "abc-123",
+  "message": "What programs does Smile Again run?",
+  "assistant_type": "nonprofit",
+  "session_id": "demo-abc123",
   "history": []
 }
 ```
 
-`assistant_type` is one of `"document"`, `"website"`, `"property"`.
+`assistant_type` is one of: `"website"` · `"property"` · `"document"` · `"nonprofit"`
 
-Response includes `answer`, `sources`, `confidence`, `intent`, and `suggest_booking`.
+Response:
+
+```json
+{
+  "answer": "Smile Again runs six core programs...",
+  "sources": ["programs.md"],
+  "confidence": 0.91,
+  "intent": "question",
+  "suggest_booking": false
+}
+```
 
 ---
 
-### Upload a Document
+### POST /documents/upload
 
 ```
-POST /documents/upload
 Content-Type: multipart/form-data
 
 file=<your-file>
 namespace=document-demo
 ```
 
-Supported formats: PDF, DOCX, TXT, MD. Max 20 MB.
-
-The document is chunked, embedded, and stored in Pinecone under the given namespace. After upload, you can query it immediately via `/chat`.
+Supported formats: PDF, DOCX, TXT, MD. Max 20 MB. The document is chunked, embedded with `text-embedding-3-small`, and stored in Pinecone. Ready to query immediately.
 
 ---
 
-### Ingest Text Directly
-
-```
-POST /documents/text
-```
+### POST /documents/text
 
 ```json
 {
@@ -161,15 +222,9 @@ POST /documents/text
 }
 ```
 
-Useful for ingesting website content or property guides without a file.
-
 ---
 
-### Capture a Lead
-
-```
-POST /leads
-```
+### POST /leads
 
 ```json
 {
@@ -177,55 +232,31 @@ POST /leads
   "name": "Jane Smith",
   "business": "Property management company",
   "pain_point": "Answering the same guest questions every day",
-  "hours_saved": "5-10 hours/week",
   "assistant": "property",
-  "session_id": "abc-123"
+  "session_id": "demo-abc123"
 }
 ```
 
-Stored in `data/leads.db` (SQLite). Every Q&A pair is also logged for product intelligence.
+Stored in `data/leads.db` (SQLite). Every Q&A exchange is also logged for product intelligence.
 
 ---
 
 ## Pinecone Namespaces
 
-One Pinecone index, three namespaces — clean separation per assistant:
+One index, four namespaces:
 
 | Assistant | Namespace | Content |
 |-----------|-----------|---------|
-| Website | `jamiiz-website` | Jamiiz AI company content, services, FAQs |
-| Property | `property-demo` | House rules, check-in, local guide |
-| Document | `document-demo` | User-uploaded documents |
-
-To ingest the starter knowledge base:
-
-```bash
-cd backend
-python3 -c "
-from app.core.config import get_settings
-from app.services.document_ingestion_service import get_ingestion_service
-from pathlib import Path
-
-s = get_settings()
-ing = get_ingestion_service()
-
-# Ingest Jamiiz knowledge base
-ing.ingest_directory(Path('../knowledge/jamiiz'), namespace=s.pinecone_ns_website)
-
-# Ingest property content
-ing.ingest_directory(Path('../knowledge/property'), namespace=s.pinecone_ns_property)
-
-# Ingest sample nonprofit docs
-ing.ingest_directory(Path('../knowledge/nonprofit'), namespace=s.pinecone_ns_document)
-print('Done.')
-"
-```
+| Jamiiz Assistant | `jamiiz-website` | Services, pricing, FAQs, use cases |
+| Asante Guest Assistant | `property-demo` | Amenities, check-in, house rules, pricing |
+| Document Assistant | `document-demo` | User-uploaded documents (runtime) |
+| Smile Again Assistant | `nonprofit-demo` | Programs, impact data, donor FAQ, grant profile |
 
 ---
 
 ## LangGraph — Document Assistant Flow
 
-The Document Assistant uses a LangGraph pipeline for multi-step reasoning:
+The Document Assistant uses a multi-step LangGraph pipeline:
 
 ```
 START
@@ -236,45 +267,60 @@ START
   → END
 ```
 
-The Website and Property assistants use a simpler RAG → LLM chain (no graph needed for Q&A).
+The other three assistants use a simpler RAG → LLM chain — no graph needed for conversational Q&A.
 
 ---
 
 ## Adding a New Assistant
 
-1. Create `backend/app/assistants/<name>/prompt.md` with the system prompt
-2. Create `backend/app/assistants/<name>/config.yaml` with namespace and settings
-3. Add the namespace to `.env` and `config.py`
-4. Ingest your knowledge base content into the new namespace
-5. The `/chat` endpoint will route to it automatically
+1. Create `backend/app/assistants/<name>/prompt.md` — system prompt defining personality and scope
+2. Create `backend/app/assistants/<name>/config.yaml` — namespace and model settings
+3. Add `PINECONE_NS_<NAME>=<namespace>` to `.env` and `config.py`
+4. Add the assistant type to the `Literal` in `backend/app/schemas/chat.py`
+5. Add the namespace mapping in `namespace_for()` in `config.py`
+6. Add a knowledge base folder under `knowledge/<name>/` and run `ingest.py`
+7. Add the demo entry to `DEMOS` array in `frontend/src/App.jsx`
 
 ---
 
 ## Demo Script (5 minutes)
 
-1. **Document Assistant** — upload a grant document, ask "Does this grant fit our organization?" and "Draft a problem statement."
-2. **Website Assistant** — ask "What does Jamiiz AI do?" and "Can you help a nonprofit?"
-3. **Property Assistant** — ask "What time is check-in?" and "The AC isn't working, what should I do?"
-4. Show the lead capture: after a few exchanges the assistant suggests booking a Free AI Workflow Review.
-5. Close: "We build this for your business — trained on your documents, your workflows, your voice."
+1. **Jamiiz Assistant** — "What does Jamiiz AI do?" / "How much does it cost?" / "Can you help a nonprofit?"
+2. **Asante Guest Assistant** — "What time is check-in?" / "What are the house rules?" / "Tell me about the studio apartment."
+3. **Document Assistant** — upload a grant PDF, ask "Does this grant fit our organization?" and "Draft a problem statement."
+4. **Smile Again Assistant** — "What programs does Smile Again run?" / "How can I sponsor a girl's education?" / "What is the impact so far?"
+5. After 3+ exchanges, the lead capture modal triggers — show how prospects are captured automatically.
 
 ---
 
 ## Deployment
 
-For demos, the simplest setup is:
+| Layer | Platform | Notes |
+|-------|----------|-------|
+| Backend | [Render](https://render.com) or [Railway](https://railway.app) | Free tier sufficient for demos |
+| Frontend | [Vercel](https://vercel.com) or Hostinger | Static build: `npm run build` |
 
-- **Backend**: [Render](https://render.com) or [Railway](https://railway.app) (free tier sufficient)
-- **Frontend**: Vercel or Hostinger
+Set all `.env` variables in the platform dashboard. Backend starts with:
 
-Set your environment variables in the platform's dashboard. The server starts with `uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
+```
+uvicorn app.main:app --host 0.0.0.0 --port $PORT
+```
+
+Update `ALLOWED_ORIGINS` in `.env` to include your production frontend URL.
 
 ---
 
 ## Roadmap
 
-- [ ] Frontend — React chat widget + demo pages
-- [ ] NGO Funding Assistant — LangGraph with grant discovery tools
+- [x] FastAPI backend with four assistants
+- [x] LangGraph pipeline for Document Assistant
+- [x] Pinecone RAG with deterministic chunk IDs
+- [x] LangSmith tracing
+- [x] React frontend (Vite) with Jamiiz branding
+- [x] Lead capture modal + SQLite storage
+- [x] Smile Again nonprofit assistant
+- [ ] Streaming responses — token-by-token output
 - [ ] Lead dashboard — view captured leads in the browser
-- [ ] Streaming responses — token-by-token output for better UX
+- [ ] Tavily search integration — live web search for Jamiiz assistant
 - [ ] Multi-tenant namespacing — per-client document isolation
+- [ ] NGO Funding Assistant — LangGraph with grant discovery tools
