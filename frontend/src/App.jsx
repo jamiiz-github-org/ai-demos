@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import ChatWidget from './components/ChatWidget'
 import FileUpload from './components/FileUpload'
 import LeadCaptureForm from './components/LeadCaptureForm'
@@ -58,13 +58,19 @@ export default function App() {
   const [showLead, setShowLead] = useState(false)
   const current = DEMOS.find((d) => d.id === activeDemo)
 
+  // Always start at the top on load
+  useEffect(() => {
+    window.history.scrollRestoration = 'manual'
+    window.scrollTo(0, 0)
+  }, [])
+
   return (
     <div className="app">
 
       {/* ── NAV ── */}
       <header className="nav">
         <div className="nav-inner">
-          <div className="nav-logo">
+          <div className="nav-logo" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} style={{ cursor: 'pointer' }}>
             <span className="logo-icon">J</span>
             <span className="logo-text">Jamiiz <span>AI</span></span>
           </div>
