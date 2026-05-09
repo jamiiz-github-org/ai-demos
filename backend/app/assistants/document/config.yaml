@@ -1,0 +1,12 @@
+assistant_type: document
+display_name: "Document AI Assistant"
+namespace: document-demo
+retrieval_k: 5
+retrieval_k_summary: 8
+use_langgraph: true
+max_file_size_mb: 20
+supported_formats:
+  - .pdf
+  - .docx
+  - .txt
+  - .md
