@@ -17,6 +17,11 @@ const SUGGESTED = {
     'What are the key requirements?',
     'Draft a problem statement',
   ],
+  nonprofit: [
+    'What does Smile Again do?',
+    'How can I sponsor a girl\'s education?',
+    'What is the impact so far?',
+  ],
 }
 
 export default function ChatWidget({ assistantType, sessionId, onLeadTrigger }) {
